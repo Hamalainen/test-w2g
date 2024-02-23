@@ -1,4 +1,5 @@
-import youtubeApi from '@/src/api/youtubeApi'
+import youtubeApi from "../api/youtubeApi";
+
     export default function testinginit () {
         return youtubeApi()
     }

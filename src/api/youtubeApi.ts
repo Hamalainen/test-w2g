@@ -1,5 +1,5 @@
 // require("https://apis.google.com/js/api.js");
-export default () => {
+export default function () {
 
   const start = () => {
     // 2. Initialize the JavaScript client library.

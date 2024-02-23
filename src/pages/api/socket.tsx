@@ -1,4 +1,5 @@
-import { playerMessages } from '@/src/interfaces/playerMessages'
+
+import { playerMessage } from '@/src/interfaces/playerMessages'
 import { Server } from 'socket.io'
 
 const SocketHandler = (req:any, res:any) => {
@@ -10,8 +11,19 @@ const SocketHandler = (req:any, res:any) => {
     res.socket.server.io = io
 
     io.on('connection', socket => {
-      socket.on('input-change', (msg:playerMessages) => {
-        socket.broadcast.emit('update-input', msg)
+      socket.on('joinRoom', (msg:string) => {
+        console.log('joining room ' + msg)
+        socket.join(msg)
+
+      })
+      socket.on('playerState-change', (msg:playerMessage) => {
+        io.to(msg.roomId).emit('update-playerState', msg)
+      })
+      socket.on('playerProgress-change', (msg:playerMessage) => {
+        io.to(msg.roomId).emit('update-playerProgress', msg)
+      })
+      socket.on('video-change', (msg:playerMessage) => {
+        io.to(msg.roomId).emit('update-video', msg)
       })
     })
   }
