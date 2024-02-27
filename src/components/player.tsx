@@ -13,12 +13,41 @@ import {
   faVolumeLow,
   faVolumeOff,
 } from "@fortawesome/free-solid-svg-icons";
-
 let playerEvent: YouTubeEvent<any>;
 export default function Player(room: any) {
   const [progressTime, setProgressTime] = useState(Number);
   const [playing, setPlaying] = useState(Boolean);
   const [volume, setVolume] = useState(Number);
+
+  useEffect(() => {
+    socket.on("joined-room", async (msg: playerMessage) => {
+      let waiting = true;
+      while (waiting) {
+        if (playerEvent) {
+          playerEvent.target.loadVideoById(msg.currentVideo);
+          playerEvent.target.seekTo(
+            getCurrentTime(
+              playerEvent.target.getDuration(),
+              msg.currentTimePercentage
+            )
+          );
+          playerEvent.target.playVideo();
+          setPlaying(true);
+          setProgressTime(msg.currentTimePercentage);
+          progressTimer();
+          waiting = false;
+        } else {
+          await new Promise((resolve:any) => {
+            setTimeout(() => {resolve()}, 500);
+          });
+        }
+      }
+    });
+    return () => {
+      socket.off("joined-room");
+    };
+  }, []);
+
   useEffect(() => {
     socket.on("update-playerState", (msg: playerMessage) => {
       if (msg.action == playerAction.Pause) {
@@ -95,6 +124,7 @@ export default function Player(room: any) {
   };
 
   const playPause = () => {
+
     let message: playerMessage = {
       roomId: room.room,
       currentTimePercentage: progressTime,
@@ -148,7 +178,6 @@ export default function Player(room: any) {
     width: "900",
     playerVars: {
       // https://developers.google.com/youtube/player_parameters
-      autoplay: 1,
       controls: 0,
       disablekb: 1,
     },
@@ -157,7 +186,6 @@ export default function Player(room: any) {
   return (
     <div className="w-900 h-548">
       <YouTube
-        videoId="DLXwnPMbivE"
         opts={opts}
         onReady={onPlayerReady}
         onEnd={onVideoEnd}

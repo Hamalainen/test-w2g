@@ -8,7 +8,6 @@ if (typeof window !== "undefined") {
 
 socket = io();
 
-console.log(socket)
 export let message: playerMessage = {
   roomId: "",
   currentTimePercentage: 0,
@@ -22,7 +21,6 @@ export const nextVideo = (videoId: string) => {
 };
 
 socket.onAny((event: any, msg: playerMessage) => {
-  console.log("anny message", msg)
   message = msg;
 });
 export default socket;

@@ -3,9 +3,14 @@
 import SearchPage from "@/src/components/search";
 import socket from "@/src/api/socketApi";
 import Player from "@/src/components/player";
+import { playerMessage } from "@/src/interfaces/playerMessages";
 
 export default function room({ params }: { params: { room: string } }) {
-  socket.emit("joinRoom", params.room);
+  let initroom: playerMessage = {
+    roomId:params.room,
+    currentTimePercentage: 0
+  }
+  socket.emit("joinRoom", initroom);
   return (
     <main>
       <SearchPage />
