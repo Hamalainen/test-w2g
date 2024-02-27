@@ -8,7 +8,7 @@ import { playerMessage } from "@/src/interfaces/playerMessages";
 export default function room({ params }: { params: { room: string } }) {
   let initroom: playerMessage = {
     roomId:params.room,
-    currentTimePercentage: 0
+    currentTimePercentage: -1
   }
   socket.emit("joinRoom", initroom);
   return (

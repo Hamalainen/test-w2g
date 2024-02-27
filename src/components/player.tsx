@@ -37,8 +37,10 @@ export default function Player(room: any) {
           progressTimer();
           waiting = false;
         } else {
-          await new Promise((resolve:any) => {
-            setTimeout(() => {resolve()}, 500);
+          await new Promise((resolve: any) => {
+            setTimeout(() => {
+              resolve();
+            }, 1000);
           });
         }
       }
@@ -50,27 +52,29 @@ export default function Player(room: any) {
 
   useEffect(() => {
     socket.on("update-playerState", (msg: playerMessage) => {
-      if (msg.action == playerAction.Pause) {
-        playerEvent.target.pauseVideo();
-        playerEvent.target.seekTo(
-          getCurrentTime(
-            playerEvent.target.getDuration(),
-            msg.currentTimePercentage
-          )
-        );
-        setPlaying(false);
-        setProgressTime(msg.currentTimePercentage);
-      } else if (msg.action == playerAction.Play) {
-        playerEvent.target.playVideo();
-        playerEvent.target.seekTo(
-          getCurrentTime(
-            playerEvent.target.getDuration(),
-            msg.currentTimePercentage
-          )
-        );
-        setPlaying(true);
-        setProgressTime(msg.currentTimePercentage);
-        progressTimer();
+      if (playerEvent.target.getVideoData().title != "") {
+        if (msg.action == playerAction.Pause) {
+          playerEvent.target.pauseVideo();
+          playerEvent.target.seekTo(
+            getCurrentTime(
+              playerEvent.target.getDuration(),
+              msg.currentTimePercentage
+            )
+          );
+          setPlaying(false);
+          setProgressTime(msg.currentTimePercentage);
+        } else if (msg.action == playerAction.Play) {
+          playerEvent.target.playVideo();
+          playerEvent.target.seekTo(
+            getCurrentTime(
+              playerEvent.target.getDuration(),
+              msg.currentTimePercentage
+            )
+          );
+          setPlaying(true);
+          setProgressTime(msg.currentTimePercentage);
+          progressTimer();
+        }
       }
     });
     return () => {
@@ -79,7 +83,6 @@ export default function Player(room: any) {
   }, []);
   useEffect(() => {
     socket.on("update-playerProgress", (msg: playerMessage) => {
-      console.log(msg);
       playerEvent.target.seekTo(
         getCurrentTime(
           playerEvent.target.getDuration(),
@@ -115,7 +118,6 @@ export default function Player(room: any) {
   const onPlayerReady: YouTubeProps["onReady"] = (event) => {
     setVolume(10);
     playerEvent = event;
-    playerEvent.target.pauseVideo();
     playerEvent.target.setVolume(volume);
     document.getElementById("playbutton")?.click();
     setTimeout(() => {
@@ -124,7 +126,6 @@ export default function Player(room: any) {
   };
 
   const playPause = () => {
-
     let message: playerMessage = {
       roomId: room.room,
       currentTimePercentage: progressTime,
@@ -151,15 +152,18 @@ export default function Player(room: any) {
   };
   const progressTimer = () => {
     let interval = setInterval(() => {
+      // console.log("timer")
       setProgressTime(
         (playerEvent.target.getCurrentTime() /
           playerEvent.target.getDuration()) *
           100
       );
-      if (!playing) {
-        clearInterval(interval);
-      }
-    }, 250);
+
+      // if (!playing) {
+      //   console.log("!playing")
+      //   clearInterval(interval);
+      // }
+    }, 500);
   };
   const onProgressMouseUp = () => {
     let message: playerMessage = {

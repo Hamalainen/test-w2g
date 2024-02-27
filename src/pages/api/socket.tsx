@@ -3,12 +3,15 @@ import { Server } from "socket.io";
 
 let state: playerMessage[] = [];
 
-const saveMessage = (msg: playerMessage) => {
-  let room = state.find((a) => {return a.roomId == msg.roomId});
+const saveMessage = async (msg: playerMessage) => {
+  let room = state.find((a) => {
+    return a.roomId == msg.roomId;
+  });
   if (room) {
-    room.action = msg.action ?? undefined;
-    room.currentTimePercentage = msg.currentTimePercentage;
-    room.currentVideo = msg.currentVideo ?? undefined;
+    if (msg.action) room.action = msg.action;
+    if (msg.currentTimePercentage > -1)
+      room.currentTimePercentage = msg.currentTimePercentage;
+    if (msg.currentVideo) room.currentVideo = msg.currentVideo;
     room.roomId = msg.roomId;
   } else {
     state.push({
@@ -29,22 +32,42 @@ const SocketHandler = (req: any, res: any) => {
     res.socket.server.io = io;
 
     io.on("connection", (socket) => {
-      socket.prependAny((event: any, msg: playerMessage) => {
-        saveMessage(msg);
+      socket.prependAny(async (event: any, msg: playerMessage) => {
+        await saveMessage(msg);
       });
       socket.on("joinRoom", (msg: playerMessage) => {
         console.log("joining room " + msg.roomId);
-        socket.join(msg.roomId)
-        socket.emit("joined-room", state.find((a) => {return a.roomId == msg.roomId}));
+        socket.join(msg.roomId);
+        socket.emit(
+          "joined-room",
+          state.find((a) => {
+            return a.roomId == msg.roomId;
+          })
+        );
       });
       socket.on("playerState-change", (msg: playerMessage) => {
-        io.to(msg.roomId).emit("update-playerState", state.find((a) => {return a.roomId == msg.roomId}));
+        io.to(msg.roomId).emit(
+          "update-playerState",
+          state.find((a) => {
+            return a.roomId == msg.roomId;
+          })
+        );
       });
       socket.on("playerProgress-change", (msg: playerMessage) => {
-        io.to(msg.roomId).emit("update-playerProgress", state.find((a) => {return a.roomId == msg.roomId}));
+        io.to(msg.roomId).emit(
+          "update-playerProgress",
+          state.find((a) => {
+            return a.roomId == msg.roomId;
+          })
+        );
       });
       socket.on("video-change", (msg: playerMessage) => {
-        io.to(msg.roomId).emit("update-video", state.find((a) => {return a.roomId == msg.roomId}));
+        io.to(msg.roomId).emit(
+          "update-video",
+          state.find((a) => {
+            return a.roomId == msg.roomId;
+          })
+        );
       });
     });
   }

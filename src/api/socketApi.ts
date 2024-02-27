@@ -21,6 +21,7 @@ export const nextVideo = (videoId: string) => {
 };
 
 socket.onAny((event: any, msg: playerMessage) => {
+  console.log(event, msg)
   message = msg;
 });
 export default socket;
